@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from flask import Blueprint, request, redirect, jsonify
-from common.libs.Helper import ops_render, iPagination,getCurrentDate
+from common.libs.Helper import ops_render, iPagination, getCurrentDate
 from common.models.user import User
 from common.libs.UrlManager import UrlManager
 from common.libs.user.UserService import UserService
+from sqlalchemy import or_
 from application import app, db
 
 route_account = Blueprint('account_page', __name__)
@@ -13,15 +14,24 @@ route_account = Blueprint('account_page', __name__)
 def index():
     resp_data = {}
     req = request.values
-    page = int(req['page']) if ('page' in req and req['page']) else 1
+    page = int(req['p']) if ('p' in req and req['p']) else 1
     query = User.query
+
+    if "mix_kw" in req:
+        rule = or_(User.nickname.ilike("%{0}%".format(
+            req['mix_kw'])), (User.mobile.ilike("%{0}%".format(req['mix_kw']))))
+        query = query.filter(rule)
+
+    if 'status' in req and int(req['status']) > -1:
+        query = query.filter(User.status == int(req['status']))
+
 
     page_params = {
         'total': query.count(),
         'page_size': app.config['PAGE_SIZE'],
         'page': page,
         'display': app.config['PAGE_DISPLAY'],
-        'url': '/account/index'
+        'url': request.full_path.replace("&p={}".format(page), "")
     }
 
     pages = iPagination(page_params)
@@ -32,6 +42,9 @@ def index():
 
     resp_data['list'] = list
     resp_data['pages'] = pages
+    resp_data['search_con'] = req
+    app.logger.info(resp_data['search_con'])
+    resp_data['status_mapping'] = app.config['STATUS_MAPPING']
     return ops_render("account/index.html", resp_data)
 
 
@@ -52,20 +65,20 @@ def info():
     return ops_render("account/info.html", resp_data)
 
 
-@route_account.route("/set", methods=["GET","POST"])
+@route_account.route("/set", methods=["GET", "POST"])
 def set():
     default_pwd = "******"
     if request.method == "GET":
         resp_data = {}
         req = request.args
-        uid = int(req.get("id",0))
+        uid = int(req.get("id", 0))
         info = None
         if uid:
-            info = User.query.filter_by(uid = uid).first()
+            info = User.query.filter_by(uid=uid).first()
         resp_data['info'] = info
         return ops_render("account/set.html", resp_data)
 
-    resp = {'code':200, 'msg': '操作成功~', 'data': {}}
+    resp = {'code': 200, 'msg': '操作成功~', 'data': {}}
     req = request.values
 
     id = req['id'] if 'id' in req else 0
@@ -100,7 +113,8 @@ def set():
         resp['msg'] = "请输入符合规范的登陆密码~~"
         return jsonify(resp)
 
-    has_in = User.query.filter(User.login_name == login_name, User.uid != id).first()
+    has_in = User.query.filter(
+        User.login_name == login_name, User.uid != id).first()
     if has_in:
         resp['code'] = -1
         resp['msg'] = "该登陆名已存在,换一个试试~~"
@@ -120,7 +134,8 @@ def set():
     model_user.email = email
     model_user.login_name = login_name
     if login_pwd != default_pwd:
-        model_user.login_pwd = UserService.genePwd(login_pwd,model_user.login_salt)   
+        model_user.login_pwd = UserService.genePwd(
+            login_pwd, model_user.login_salt)
     model_user.created_time = getCurrentDate()
 
     db.session.add(model_user)
