@@ -12,6 +12,9 @@
 #     "^/static",
 #     "^/favicon.ico"
 # ]
+# PAGE_SIZE = 50
+# PAGE_DISPLAY = 10
+
 
 # 因为win无法使用export ops_config=local
 SERVER_PORT = 8999
@@ -30,3 +33,5 @@ IGNORE_CHECK_LOGIN_URLS = [
     "^/static",
     "^/favicon.ico"
 ]
+PAGE_SIZE = 50
+PAGE_DISPLAY = 10
