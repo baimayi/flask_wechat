@@ -12,6 +12,8 @@
 	"appid": "wx98718ab15f4e2e21",
 	"projectname": "test_mina",
 	"isGameTourist": false,
+	"simulatorType": "wechat",
+	"simulatorPluginLibVersion": {},
 	"condition": {
 		"search": {
 			"current": -1,
