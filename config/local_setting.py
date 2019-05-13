@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 
+RELEASE_VERSION = "v0.2"
 DEBUG = True
 SQLALCHEMY_ECHO = True
 SQLALCHEMY_DATABASE_URI = 'mysql://root:000000@192.168.159.145/mysql'

@@ -2,6 +2,7 @@
 from flask import Blueprint, request, redirect, jsonify
 from common.libs.Helper import ops_render, iPagination, getCurrentDate
 from common.models.user import User
+from common.models.log.AppAccessLog import AppAccessLog
 from common.libs.UrlManager import UrlManager
 from common.libs.user.UserService import UserService
 from sqlalchemy import or_
@@ -19,12 +20,11 @@ def index():
 
     if "mix_kw" in req:
         rule = or_(User.nickname.ilike("%{0}%".format(
-            req['mix_kw'])), (User.mobile.ilike("%{0}%".format(req['mix_kw']))))
+            req['mix_kw'])), User.mobile.ilike("%{0}%".format(req['mix_kw'])))
         query = query.filter(rule)
 
     if 'status' in req and int(req['status']) > -1:
         query = query.filter(User.status == int(req['status']))
-
 
     page_params = {
         'total': query.count(),
@@ -38,12 +38,11 @@ def index():
     offset = (page - 1) * app.config['PAGE_SIZE']
     limit = app.config['PAGE_SIZE'] * page
 
-    list = query.order_by(User.uid.desc()).all()[offset:limit]
+    lists = query.order_by(User.uid.desc()).all()[offset:limit]
 
-    resp_data['list'] = list
+    resp_data['list'] = lists
     resp_data['pages'] = pages
-    resp_data['search_con'] = req
-    app.logger.info(resp_data['search_con'])
+    resp_data['search_con'] = query
     resp_data['status_mapping'] = app.config['STATUS_MAPPING']
     return ops_render("account/index.html", resp_data)
 
@@ -61,7 +60,9 @@ def info():
     if not info:
         return redirect(reback_url)
 
+    access_list = AppAccessLog.query.filter_by(uid=uid).order_by(AppAccessLog.id.desc()).limit(10).all()
     resp_data['info'] = info
+    resp_data['access_list'] = access_list
     return ops_render("account/info.html", resp_data)
 
 
@@ -140,4 +141,42 @@ def set():
 
     db.session.add(model_user)
     db.session.commit()
+    return jsonify(resp)
+
+
+@route_account.route("/ops", methods=["POST"])
+def ops():
+    resp = {'code': 200, 'msg': '操作成功~', 'data': {}}
+    req = request.values
+
+    id = req['id'] if 'id' in req else 0
+    act = req['act'] if 'act' in req else ''
+
+    if not id:
+        resp['code'] = -1
+        resp['msg'] = "请选择要操作的账号~~"
+        return jsonify(resp)
+
+    if act not in ['remove', 'recover']:
+        resp['code'] = -1
+        resp['msg'] = "操作有误,请重试~~"
+        return jsonify(resp)
+
+    user_info = User.query.filter_by(uid=id).first()
+    if not user_info:
+        resp['code'] = -1
+        resp['msg'] = "指定账号不存在~~"
+        return jsonify(resp)
+
+    if act == "remove":
+        user_info.status = 0
+    elif act == "recover":
+        user_info.status = 1
+
+    user_info.update_time = getCurrentDate()
+    db.session.add(user_info)
+    db.session.commit()
+
+    app.logger.info(resp)
+
     return jsonify(resp)

@@ -1,9 +1,11 @@
 # -*- encoding: utf-8 -*-
-from common.libs.UrlManager import UrlManager
+import os
+
 from flask import Flask
 from flask_script import Manager
 from flask_sqlalchemy import SQLAlchemy
-import os
+
+from common.libs.UrlManager import UrlManager
 
 
 class Application(Flask):

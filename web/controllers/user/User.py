@@ -43,6 +43,11 @@ def login():
         resp['msg'] = "请输入正确的用户名或密码~~"
         return jsonify(resp)
 
+    if user_info.status != 1:
+        resp['code'] = -1
+        resp['msg'] = "账号已经被禁用请联系管理员处理~~"
+        return jsonify(resp)
+
     response = make_response(json.dumps({'code': 200, 'msg': '登陆成功~~'}))
     # 保存120天
     response.set_cookie(app.config["AUTH_COOKIE_NAME"], "%s#%s" % (
