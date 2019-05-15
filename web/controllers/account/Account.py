@@ -177,6 +177,5 @@ def ops():
     db.session.add(user_info)
     db.session.commit()
 
-    app.logger.info(resp)
 
     return jsonify(resp)

@@ -18,6 +18,10 @@
 #   "1":"正常",
 #    "0": "已删除"
 # }
+# MINA_APP = {
+#   'appid':'',
+#   'appkey':''
+# }
 
 
 # 因为win无法使用export ops_config=local
@@ -31,7 +35,8 @@ AUTH_COOKIE_NAME = "mooc_food"
 
 ## 过滤url
 IGNORE_URLS = [
-    "^/user/login"
+    "^/user/login",
+    "^/api"
 ]
 IGNORE_CHECK_LOGIN_URLS = [
     "^/static",
