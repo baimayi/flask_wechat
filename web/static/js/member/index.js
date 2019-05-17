@@ -2,7 +2,6 @@ var member_index_ops = {
   init: function() {
     this.eventBind();
   },
-
   eventBind: function() {
     var that = this;
     $(".wrap_search .search").click(function() {
@@ -21,7 +20,7 @@ var member_index_ops = {
     var callback = {
       ok: function() {
         $.ajax({
-          url: common_ops.buildUrl("/account/ops"),
+          url: common_ops.buildUrl("/member/ops"),
           type: "POST",
           data: {
             act: act,
@@ -35,7 +34,7 @@ var member_index_ops = {
                 window.location.href = window.location.href;
               };
             }
-            common_ops.alert(res.msg.callback);
+            common_ops.alert(res.msg, callback);
           }
         });
       },
