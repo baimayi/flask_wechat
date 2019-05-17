@@ -12,7 +12,7 @@ from common.libs.member.MemberService import MemberService
 
 @route_api.route("/member/login", methods=["GET", "POST"])
 def login():
-    resp = {'code': 200, 'msg': '操作成功~', data: {}}
+    resp = {'code': 200, 'msg': '操作成功~', 'data': {}}
     req = request.values
     code = req['code'] if 'code' in req else ''
     if not code or len(code) < 1:
@@ -31,7 +31,7 @@ def login():
     avatar = req['avatarUrl'] if 'avatarUrl' in req else ''
 
     # 判断是否已经注册过,注册了直接返回一些信息
-    bind_info = OauthMemberBind.filter_by(openid=openid, type=1).first()
+    bind_info = OauthMemberBind.query.filter_by(openid=openid, type=1).first()
     if not bind_info:
         model_member = Member()
         model_member.nickname = nickname
@@ -63,7 +63,7 @@ def login():
 
 @route_api.route("/member/check-reg", methods=["GET", "POST"])
 def checkReg():
-    resp = {'code': 200, 'msg': '操作成功~', data: {}}
+    resp = {'code': 200, 'msg': '操作成功~', 'data': {}}
     req = request.values
     code = req['code'] if 'code' in req else ''
     if not code or len(code) < 1:
@@ -77,7 +77,7 @@ def checkReg():
         resp['msg'] = '调用微信出错'
         return jsonify(resp)
 
-    bind_info = OauthMemberBind.filter_by(openid=openid, type=1).first()
+    bind_info = OauthMemberBind.query.filter_by(openid=openid, type=1).first()
     if not bind_info:
         resp['code'] = -1
         resp['msg'] = '未绑定'
