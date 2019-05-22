@@ -1,7 +1,6 @@
 # coding: utf-8
 from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.schema import FetchedValue
-
 from application import app, db
 
 

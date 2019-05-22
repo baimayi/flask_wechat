@@ -75,7 +75,7 @@ def set():
             return redirect(reback_url)
 
         resp_data['info'] = info
-        app.logger.info(resp_data['info'])
+
         resp_data['current'] = 'index'
         return ops_render("member/set.html", resp_data)
 
